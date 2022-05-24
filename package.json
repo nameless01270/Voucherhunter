@@ -1,0 +1,31 @@
+{
+  "name": "voucherhunter",
+  "version": "1.0.0",
+  "description": "building voucher hunter web",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "nodemon src/index.js"
+  },
+  "author": "Vu Minh Thu",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.16"
+  },
+  "dependencies": {
+    "axios": "^0.27.2",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.0",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "express-validator": "^6.14.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.3.4",
+    "mongoose-unique-validator": "^3.0.0",
+    "multer": "^1.4.4",
+    "uuid": "^8.3.2",
+    "uuidv4": "^6.2.13"
+  }
+}
