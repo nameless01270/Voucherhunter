@@ -9,26 +9,28 @@ const UserSchema = new mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
+      trim: true,
+      index: { unique: true },
+      match: /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/,
     },
-    country: {
+    name: {
       type: String,
       required: true,
+      maxlength: 32,
     },
-    img: {
+    userImage: {
       type: String,
     },
-    city: {
+    phoneNumber: {
       type: String,
-      required: true,
-    },
-    phone: {
-      type: String,
-      required: true,
     },
     password: {
       type: String,
       required: true,
+    },
+    history: {
+      type: Array,
+      default: [],
     },
     isAdmin: {
       type: Boolean,

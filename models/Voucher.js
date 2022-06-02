@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 const Schema = mongoose.Schema;
+const { ObjectId } = mongoose.Schema.Types;
 
 const VoucherSchema = new Schema({
     title: { 
@@ -22,29 +23,30 @@ const VoucherSchema = new Schema({
         type: String, 
         required: false 
     },
+    sold: {
+        type: Number,
+        default: 0,
+    },
     quantity: { 
         type: Number, 
         required: true 
     },
+    category: {
+        type: ObjectId,
+        ref: "categories",
+    },
     price: { 
         type: Number, 
         required: true 
-    },
-    created: {
-        type: Number,
-        default: Date.now(),
-        required: true
-    },
-    updated: {
-        type: Number,
-        default: null
     },
     status: { 
         type: String, 
         enum: ['stocking', 'sold out'],
         default: 'stocking',
         required: true
-    }
-})
+    },
+    },
+    { timestamps: true }
+)
 
 export default mongoose.model("Voucher", VoucherSchema);
