@@ -1,7 +1,7 @@
 import Voucher from "../models/Voucher.js";
 
 export const createVoucher = async (req, res, next) => {
-  const newVoucher = new Voucher(req.body);
+  let newVoucher = new Voucher(req.body);
   try {
     const savedVoucher = await newVoucher.save();
     res.status(200).json(savedVoucher);
@@ -66,20 +66,20 @@ export const getVouchers = async (req, res, next) => {
 };
 
 export const getVoucherByPrice = async (req, res, next) => {
-    let { price } = req.body;
-    if (!price) {
-      return res.json({ error: "All filled must be required" });
-    } else {
-      try {
-        let vouchers = await Voucher
-          .find({ price: { $lt: price } })
-          .populate("title")
-          .sort({ price: -1 });
-        if (vouchers) {
-          return res.json({ Vouchers: vouchers });
-        }
-      } catch (err) {
-        return res.json({ error: "Filter product wrong" });
+  let { price } = req.body;
+  if (!price) {
+    return res.json({ error: "All filled must be required" });
+  } else {
+    try {
+      let vouchers = await Voucher
+        .find({ price: { $lt: price } })
+        .populate("title")
+        .sort({ price: -1 });
+      if (vouchers) {
+        return res.status(200).json({ Vouchers: vouchers });
       }
+    } catch (err) {
+      return res.json({ error: "Filter product wrong" });
     }
   }
+};

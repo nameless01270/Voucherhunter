@@ -7,7 +7,7 @@ import {
     getVouchers,
     getVoucherByPrice,
 } from "../controllers/voucher.js";
-import Voucher from "../models/Voucher.js";
+import { upload } from "../utils/fileUpload.js";
 
 const router = express.Router();
 
@@ -26,6 +26,6 @@ router.get("/get-voucher", getVoucher);
 //GET VOUCHERS
 router.get("/get-all-voucher", getVouchers);
 
-router.post("/voucher-by-price", getVoucherByPrice);
+router.post("/get-voucher-by-price", getVoucherByPrice);
 
 export default router;

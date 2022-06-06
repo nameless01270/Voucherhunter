@@ -24,4 +24,5 @@ router.get("/get-all-user", verifyAdmin, getUsers);
 
 //POST
 router.post("/change-password", verifyUser, changePassword);
+
 export default router;

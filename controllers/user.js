@@ -13,10 +13,10 @@ export const updateUser = async (req,res,next) => {
     });
     currentUser.exec((err, result) => {
       if (err) console.log(err);
-      return res.json({ success: "User updated successfully" });
+      return res.status(200).json({ success: "User updated successfully" });
     });
   }
-}
+};
 export const deleteUser = async (req,res,next) => {
   let { uId } = req.body;
   if (!uId) {
@@ -25,10 +25,10 @@ export const deleteUser = async (req,res,next) => {
     let currentUser = await User.findByIdAndDelete(uId);
     currentUser.exec((err, result) => {
       if (err) console.log(err);
-      return res.json({ success: "User deleted successfully" });
+      return res.status(200).json({ success: "User deleted successfully" });
     });
   }
-}
+};
 export const getUser = async (req,res,next) => {
   let { uId } = req.body;
   if (!uId) {
@@ -37,13 +37,13 @@ export const getUser = async (req,res,next) => {
     try {
       let user = await User.findById(uId);
       if (user) {
-        return res.json({ user });
+        return res.status(200).json({ user });
       }
     } catch (err) {
-      console.log(err);
+      next(err);
     }
   }
-}
+};
 export const getUsers = async (req,res,next) => {
   try {
     const users = await User.find();
@@ -51,7 +51,7 @@ export const getUsers = async (req,res,next) => {
   } catch (err) {
     next(err);
   }
-}
+};
 export const changePassword = async (req, res, next)=>{
   let { uId, oldPassword, newPassword } = req.body;
   if (!uId || !oldPassword || !newPassword) {
@@ -71,7 +71,7 @@ export const changePassword = async (req, res, next)=>{
         });
         passChange.exec((err, result) => {
           if (err) console.log(err);
-          return res.json({ success: "Password updated successfully" });
+          return res.status(200).json({ success: "Password updated successfully" });
         });
       } else {
         return res.json({
@@ -80,4 +80,4 @@ export const changePassword = async (req, res, next)=>{
       }
     }
   }
-}
+};
