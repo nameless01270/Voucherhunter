@@ -1,8 +1,11 @@
 import Voucher from "../models/Voucher.js";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
 var deleteImages = (images, mode) => {
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
   var basePath = path.resolve(__dirname + "../../") + "/public/uploads/vouchers/";
   console.log(basePath);
   for (var i = 0; i < images.length; i++) {
