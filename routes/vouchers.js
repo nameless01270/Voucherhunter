@@ -7,15 +7,26 @@ import {
     getVouchers,
     getVoucherByPrice,
 } from "../controllers/voucher.js";
-import { upload } from "../utils/fileUpload.js";
+import multer from "multer";
+
+var storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "public/uploads/vouchers");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "_" + file.originalname);
+  },
+});
+
+const upload = multer({ storage: storage });
 
 const router = express.Router();
 
 //CREATE
-router.post("/create-voucher", createVoucher);
+router.post("/create-voucher", upload.any(), createVoucher);
 
 //UPDATE
-router.put("/update-voucher", updateVoucher);
+router.put("/update-voucher", upload.any(), updateVoucher);
 
 //DELETE
 router.delete("/delete-voucher", deleteVoucher);
