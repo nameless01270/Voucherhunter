@@ -79,24 +79,27 @@ export const updateVoucher = async (req, res, next) => {
     status,
     images } = req.body;
   let editImages = req.files;
-  if (!vId || !title || !brand || !description || !code || !quantity || !category || !price || !status) {
-    return res.json(vId, 
-    title, 
-    brand, 
-    description, 
-    code, 
-    quantity, 
-    category, 
-    price, 
-    status,
-    images);
+  if (
+    !vId |
+    !title |
+    !brand |
+    !description |
+    !code |
+    !quantity |
+    !category |
+    !price |
+    !status
+  ) {
+    deleteImages(editImages, "file");
+    return res.json({ title, images, vId, title, brand, description, code, quantity, category, price, status });
+  
   } else if (title.length > 255 || description.length > 3000) {
     return res.json({ error: "Name 255 & Description must not be 3000 character long" });      
   } else if (editImages && editImages.length == 1) {
     deleteImages(editImages, "file");
     return res.json({ error: "Must need to provide 2 images" });
   } else {
-    let editVoucher = {
+    let editData = {
       title,
       brand,
       description,
@@ -111,15 +114,13 @@ export const updateVoucher = async (req, res, next) => {
       for (const img of editImages) {
         allEditImages.push(img.filename);
       }
-      editVoucher = { ...editVoucher, images: allEditImages};
+      editData = { ...editData, images: allEditImages };
       deleteImages(images.split(","), "string");
     }
     try {
-      let result = await Voucher.findByIdAndUpdate(vId, editVoucher);
-      result.exec((err) => {
-        if (err) console.log(err);
-        return res.status(200).json({ success: "Voucher updated successfully"})
-      });
+      await Voucher.findByIdAndUpdate(vId, editData);
+      return res.status(200).json({ success: "Voucher updated successfully"})
+
     } catch (err) {
       next(err);
     }
@@ -175,13 +176,49 @@ export const getVoucherByPrice = async (req, res, next) => {
     try {
       let vouchers = await Voucher
         .find({ price: { $lt: price } })
-        .populate("title")
+        .populate("category", "title")
         .sort({ price: -1 });
       if (vouchers) {
         return res.status(200).json({ Vouchers: vouchers });
       }
     } catch (err) {
-      return res.json({ error: "Filter voucher wrong" });
+      next(err);
     }
   }
 };
+
+export const getVoucherByCategory = async (req, res, next) => {
+  let { cId } = req.body;
+  if (!cId) {
+    return res.json({ error: "All filled must be required" });  
+  } else {
+    try {
+      let vouchers = await Voucher
+        .find({category: cId})
+        .populate("category", "title");
+      if (vouchers) {
+        return res.status(200).json({ Vouchers: vouchers});
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+};
+
+export const getCartVoucher = async (req, res, next) => {
+    let { voucherArray } = req.body;
+    if (!voucherArray) {
+      return res.json({ error: "All filled must be required" });
+    } else {
+      try {
+        let cartVouchers = await Voucher.find({
+          _id: { $in: voucherArray },
+        });
+        if (cartVouchers) {
+          return res.json({ Vouchers: cartVouchers });
+        }
+      } catch (err) {
+        next(err);
+      }
+    }
+}

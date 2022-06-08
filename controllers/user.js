@@ -6,15 +6,12 @@ export const updateUser = async (req,res,next) => {
   if (!uId || !name || !phoneNumber) {
     return res.json({ message: "All filled must be required" });
   } else {
-    let currentUser = await User.findByIdAndUpdate(uId, {
+    await User.findByIdAndUpdate(uId, {
       name: name,
       phoneNumber: phoneNumber,
       updatedAt: Date.now(),
     });
-    currentUser.exec((err, result) => {
-      if (err) console.log(err);
-      return res.status(200).json({ success: "User updated successfully" });
-    });
+    res.status(200).json({ success: "User updated successfully" });
   }
 };
 export const deleteUser = async (req,res,next) => {
@@ -22,11 +19,8 @@ export const deleteUser = async (req,res,next) => {
   if (!uId) {
     return res.json({ message: "All filled must be required" });
   } else {
-    let currentUser = await User.findByIdAndDelete(uId);
-    currentUser.exec((err, result) => {
-      if (err) console.log(err);
-      return res.status(200).json({ success: "User deleted successfully" });
-    });
+    await User.findByIdAndDelete(uId);
+    res.status(200).json({ success: "User deleted successfully" });
   }
 };
 export const getUser = async (req,res,next) => {

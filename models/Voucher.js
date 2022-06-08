@@ -33,7 +33,7 @@ const VoucherSchema = new Schema({
     },
     category: {
         type: ObjectId,
-        ref: "categories",
+        ref: "Category",
     },
     price: { 
         type: Number, 

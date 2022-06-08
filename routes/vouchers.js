@@ -6,6 +6,8 @@ import {
     getVoucher,
     getVouchers,
     getVoucherByPrice,
+    getVoucherByCategory,
+    getCartVoucher,
 } from "../controllers/voucher.js";
 import multer from "multer";
 
@@ -26,7 +28,7 @@ const router = express.Router();
 router.post("/create-voucher", upload.any(), createVoucher);
 
 //UPDATE
-router.put("/update-voucher", upload.any(), updateVoucher);
+router.post("/update-voucher", upload.any(), updateVoucher);
 
 //DELETE
 router.delete("/delete-voucher", deleteVoucher);
@@ -37,6 +39,10 @@ router.get("/get-voucher", getVoucher);
 //GET VOUCHERS
 router.get("/get-all-voucher", getVouchers);
 
-router.post("/get-voucher-by-price", getVoucherByPrice);
+router.post("/get-vouchers-by-price", getVoucherByPrice);
+
+router.post("/get-vouchers-by-category", getVoucherByCategory);
+
+router.post("/cart-voucher", getCartVoucher);
 
 export default router;
