@@ -201,8 +201,9 @@ export const getVoucherByCategory = async (req, res, next) => {
       let vouchers = await Voucher
         .find({category: cId})
         .populate("category", "title");
+      let voucherCount = await Voucher.countDocuments({ category: cId });
       if (vouchers) {
-        return res.status(200).json({ Vouchers: vouchers});
+        return res.status(200).json({ Vouchers: vouchers, voucherCount});
       }
     } catch (err) {
       next(err);

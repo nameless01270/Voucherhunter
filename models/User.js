@@ -20,6 +20,7 @@ const UserSchema = new mongoose.Schema(
     },
     userImage: {
       type: String,
+      default: "",
     },
     phoneNumber: {
       type: String,

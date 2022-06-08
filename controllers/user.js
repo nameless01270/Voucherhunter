@@ -1,6 +1,7 @@
 import User from "../models/User.js";
-import bcrypt from "bcryptjs"; 
-
+import bcrypt from "bcryptjs";
+import fs from "fs";
+ 
 export const updateUser = async (req,res,next) => {
   let { uId, name, phoneNumber } = req.body;
   if (!uId || !name || !phoneNumber) {
@@ -72,6 +73,27 @@ export const changePassword = async (req, res, next)=>{
           error: "Your old password is wrong!!",
         });
       }
+    }
+  }
+};
+
+export const changeUserAvatar = async (req, res, next) => {
+  let { uId, userImage } = req.body;
+  let editUserImage = req.file.filename;
+  const filePath = `../VOUCHER_HUNTER_BE/public/uploads/users/${editUserImage}`;
+  if (!uId || !editUserImage) {
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.log(err);
+      }
+      return res.json({ uId, userImage, editUserImage});
+    });
+  } else {
+    try {
+      await User.findByIdAndUpdate(uId, { userImage: editUserImage });
+      return res.status(200).json({ success: "Change User avatar successfully" });
+    } catch (err) {
+      next(err);
     }
   }
 };
