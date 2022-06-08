@@ -28,7 +28,7 @@ const router = express.Router();
 router.post("/create-voucher", upload.any(), createVoucher);
 
 //UPDATE
-router.post("/update-voucher", upload.any(), updateVoucher);
+router.put("/update-voucher", upload.any(), updateVoucher);
 
 //DELETE
 router.delete("/delete-voucher", deleteVoucher);

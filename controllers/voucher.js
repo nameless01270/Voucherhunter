@@ -161,8 +161,13 @@ export const getVoucher = async (req, res, next) => {
 
 export const getVouchers = async (req, res, next) => {
   try {
-    const vouchers = await Voucher.find();    
-    res.status(200).json(vouchers);
+      let Vouchers = await Voucher
+        .find({})
+        .populate("category", "_id title")
+        .sort({ _id: -1 });
+      if (Vouchers) {
+        return res.status(200).json({ Vouchers });
+      }
   } catch (err) {
     next(err);
   }
