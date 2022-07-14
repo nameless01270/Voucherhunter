@@ -3,7 +3,8 @@ import bcrypt from "bcryptjs";
 import { createError } from "../utils/error.js";
 import jwt from "jsonwebtoken";
 import { toTitleCase, validateEmail, validatePassword } from "../config/functionSupport.js";
-import { sendEmail } from "../utils/sendEmail.js";
+import { mailTransport, generateOTP, generateEmailTemplate, plainEmailTemplate } from "../utils/sendEmail.js";
+import VerificationToken from "../models/verificationToken.js";
 
 export const register = async (req, res, next) => {
   let { username, email, name, password, aPassword } = req.body;
@@ -30,7 +31,23 @@ export const register = async (req, res, next) => {
               password: hash,
             });
 
+            const OTP = generateOTP();
+            const verificationToken = new VerificationToken({
+              owner: newUser._id,
+              token: OTP
+            })
+          
+
+            await verificationToken.save();
             await newUser.save();
+
+            mailTransport().sendMail({
+              from: 'emailverification@email.com',
+              to: newUser.email,
+              subject: "Verify your email account",
+              html: generateEmailTemplate(OTP),
+            })
+
             res.status(200).send("User has been created.");
           }
         }
@@ -77,4 +94,38 @@ export const login = async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+};
+
+export const verifyEmail = async (req, res, next) => {
+  let { uId, otp } = req.body;
+  if (!uId || !otp.trim()) return res.json({ error: "All field must be required" });
+
+  const user = await User.findById(uId);
+  if(!user) return res.json({ error: "User not found" });
+  
+  if (user.verified) return res.json({ error: "This account is already verified!"});
+
+  const token = await VerificationToken.findOne({owner: user._id});
+  if(!token) return res.json({ error: "User not found" });
+
+  const isMatched = await token.compareToken(otp);
+  if(!isMatched) return res.json({ error: "Please provide a valid token" });
+
+  user.verified = true;
+
+  await VerificationToken.findByIdAndDelete(token._id);
+  await user.save();
+
+  mailTransport().sendMail({
+    from: 'emailverification@email.com',
+    to: user.email,
+    subject: "Verify your email account",
+    html: plainEmailTemplate(
+      "Email Verified Successfully",
+      "Thanks for connecting with us"
+    ),
+  });
+
+  return res.status(200).json({ success: "Verified Successfully" });
+
 };
