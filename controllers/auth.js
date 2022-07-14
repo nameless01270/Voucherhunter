@@ -3,8 +3,10 @@ import bcrypt from "bcryptjs";
 import { createError } from "../utils/error.js";
 import jwt from "jsonwebtoken";
 import { toTitleCase, validateEmail, validatePassword } from "../config/functionSupport.js";
-import { mailTransport, generateOTP, generateEmailTemplate, plainEmailTemplate } from "../utils/sendEmail.js";
+import { mailTransport, generateOTP, generateEmailTemplate, plainEmailTemplate, generatePasswordResetTemplate } from "../utils/sendEmail.js";
 import VerificationToken from "../models/verificationToken.js";
+import ResetToken from "../models/resetToken.js";
+import { createRandomBytes } from "../utils/helper.js";
 
 export const register = async (req, res, next) => {
   let { username, email, name, password, aPassword } = req.body;
@@ -119,7 +121,7 @@ export const verifyEmail = async (req, res, next) => {
   mailTransport().sendMail({
     from: 'emailverification@email.com',
     to: user.email,
-    subject: "Verify your email account",
+    subject: "Welcome email",
     html: plainEmailTemplate(
       "Email Verified Successfully",
       "Thanks for connecting with us"
@@ -129,3 +131,70 @@ export const verifyEmail = async (req, res, next) => {
   return res.status(200).json({ success: "Verified Successfully" });
 
 };
+
+export const forgotPassword = async (req, res, next) => {
+  let { email } = req.body;
+  if(!email) return res.json({ error: "All field must be required" });
+
+  const user = await User.findOne({ email });
+  if(!user) return res.json({ error: "User not found"});
+
+  const token = await ResetToken.findOne({ owner: user._id });
+  if(token) return res.json({ message: "Only after one hour you can request for another token"});
+
+  const RandomBytes = await createRandomBytes();
+  const resetToken = new ResetToken({
+    owner: user._id, 
+    token: RandomBytes,
+  });
+  await resetToken.save();
+
+  mailTransport().sendMail({
+    from: 'security@email.com',
+    to: user.email,
+    subject: "Password Reset",
+    html: generatePasswordResetTemplate(`http://localhost:3000/reset-password?token=${RandomBytes}&id=${user._id}`),
+  });  
+
+  res.status(200).json({ message: "Password reset link is sent to email" });
+  
+};
+
+export const resetPassword1 = async (req, res, next) => {
+  let { password, aPassword } = req.body; 
+  if(!password || !aPassword) return res.json({ error: "All field must be required" });
+  
+  const user = await User.findById(req.user._id);
+  if(!user) return res.json({ error: "User not found" });
+
+  if(password !== aPassword) {
+    return res.json({ error: "aPassword isn't correct" });
+  } else {
+    const isSamePassword = await user.comparePassword(password);
+    if(isSamePassword) return res.json({message: "New password must be the different"});
+
+    if(validatePassword(password) !== true){
+      var failedList = validatePassword(password);
+      for (let i = 0; i < failedList.length; i++){
+        if (failedList[i] === 'min'){return res.json({ error: "Password must have minimum length 8" });}
+        else if (failedList[i] === 'uppercase') {return res.json({ error: "Password must have a minimum of 1 upper case letter" });}
+        else if (failedList[i] === 'lowercase') {return res.json({ error: "Password must have a minimum of 1 lower case letter" });}
+        else if (failedList[i] === 'digits') {return res.json({ error: "Password must have at least 2 digits" });}
+      }
+    }
+    user.password = aPassword.trim();
+    await user.save();
+
+    await ResetToken.findOneAndDelete({ owner: user._id });
+    mailTransport().sendMail({
+      from: "security@email.com",
+      to: user.email,
+      subject: "Password Reset Successfully",
+      html: plainEmailTemplate(
+        "Password Reset Successfully",
+        "Now you can login with new password"
+      ),
+    }); 
+    res.status(200).json({message: "Password reset successfully"}); 
+  }
+}

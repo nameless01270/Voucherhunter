@@ -1,4 +1,8 @@
 import passwordValidator from "password-validator";
+import User from "../models/User.js";
+import ResetToken from "../models/resetToken.js";
+import mongoose from 'mongoose';
+
 
 export const validatePassword = (password) => {
   var schema = new passwordValidator();
@@ -32,3 +36,22 @@ export const validateEmail = (mail) => {
     return false;
   }
 };
+
+export const isResetTokenValid = async (req, res, next) => {
+  let { token, id } = req.query;
+  if(!token || !id) return res.json({ error: "Invalid Request"});
+  
+  if(!mongoose.isValidObjectId(id)) return res.json({error: "Invalid user"});
+
+  const user = await User.findById(id);
+  if(!user) return res.json({ error: "User not found" });
+
+  const resetToken = await ResetToken.findOne({ owner: user._id });
+  if(!resetToken) return res.json({ error: "Reset token not found" });
+
+  const isValid = await resetToken.compareToken(token);
+  if(!isValid) return res.json({ error: "Reset token is not invalid"});
+
+  req.user = user;
+  next();
+}
