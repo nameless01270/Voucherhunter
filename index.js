@@ -9,6 +9,7 @@ import authRoute from "./routes/auth.js";
 import usersRoute from "./routes/users.js";
 import categoriesRoute from "./routes/categories.js";
 import ordersRoute from "./routes/orders.js";
+import adminRoute from "./routes/admin.js";
 
 const app = express();
 dotenv.config();
@@ -37,6 +38,7 @@ app.use("/api/vouchers", vouchersRoute);
 app.use("/api/users", usersRoute);
 app.use("/api/categories", categoriesRoute);
 app.use("/api/orders/", ordersRoute);
+app.use("/api/admin/", adminRoute);
 
 app.use((err, req, res, next) => {
   const errorStatus = err.status || 500;

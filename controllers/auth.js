@@ -2,7 +2,8 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import { createError } from "../utils/error.js";
 import jwt from "jsonwebtoken";
-import { toTitleCase, validateEmail } from "../config/functionSupport.js";
+import { toTitleCase, validateEmail, validatePassword } from "../config/functionSupport.js";
+import { sendEmail } from "../utils/sendEmail.js";
 
 export const register = async (req, res, next) => {
   let { username, email, name, password, aPassword } = req.body;
@@ -12,11 +13,8 @@ export const register = async (req, res, next) => {
   if (username.length < 6 || username.length > 253) {
     return res.json({ error: "Username must be 6-253 character"});
   } else {
-    if (validateEmail(email)) {
+    if (validateEmail(email) && validatePassword(password) === true) {
       username = toTitleCase(username);
-      if (password.length < 6 || password.length > 255) {
-        return res.json({ error: "Password must be 6 character" });
-      } else {
       try {
         if (password !== aPassword) {
           return res.json({ error: "aPassword isn't correct" });
@@ -39,6 +37,15 @@ export const register = async (req, res, next) => {
       } catch (err) {
         next(err);
       }
+  } else if(!validateEmail(email)) {
+    return res.json({ error: "Invalid Email"});
+  } else if(validatePassword(password) !== true) {
+    var failedList = validatePassword(password);
+    for (let i = 0; i < failedList.length; i++){
+      if (failedList[i] === 'min'){return res.json({ error: "Password must have minimum length 8" });}
+      else if (failedList[i] === 'uppercase') {return res.json({ error: "Password must have a minimum of 1 upper case letter" });}
+      else if (failedList[i] === 'lowercase') {return res.json({ error: "Password must have a minimum of 1 lower case letter" });}
+      else if (failedList[i] === 'digits') {return res.json({ error: "Password must have at least 2 digits" });}
     }
   }
 }

@@ -1,6 +1,7 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import fs from "fs";
+import { validatePassword } from "../config/functionSupport.js";
  
 export const updateUser = async (req,res,next) => {
   let { uId, name, phoneNumber } = req.body;
@@ -58,20 +59,30 @@ export const changePassword = async (req, res, next)=>{
         error: "Invalid user",
       });
     } else {
-      const oldPassCheck = await bcrypt.compare(oldPassword, data.password);
-      if (oldPassCheck) {
-        newPassword = bcrypt.hashSync(newPassword, 10);
-        let passChange = User.findByIdAndUpdate(uId, {
-          password: newPassword,
-        });
-        passChange.exec((err, result) => {
-          if (err) console.log(err);
-          return res.status(200).json({ success: "Password updated successfully" });
-        });
-      } else {
-        return res.json({
-          error: "Your old password is wrong!!",
-        });
+      if (validatePassword(newPassword) === true){
+        const oldPassCheck = await bcrypt.compare(oldPassword, data.password);
+        if (oldPassCheck) {
+          newPassword = bcrypt.hashSync(newPassword, 10);
+          let passChange = User.findByIdAndUpdate(uId, {
+            password: newPassword,
+          });
+          passChange.exec((err, result) => {
+            if (err) console.log(err);
+            return res.status(200).json({ success: "Password updated successfully" });
+          });
+        } else {
+          return res.json({
+            error: "Your old password is wrong!!",
+          });
+        }
+      } else if (validatePassword(newPassword) !== true) {
+        var failedList = validatePassword(newPassword);
+        for (let i = 0; i < failedList.length; i++){
+          if (failedList[i] === 'min'){return res.json({ error: "Password must have minimum length 8" });}
+          else if (failedList[i] === 'uppercase') {return res.json({ error: "Password must have a minimum of 1 upper case letter" });}
+          else if (failedList[i] === 'lowercase') {return res.json({ error: "Password must have a minimum of 1 lower case letter" });}
+          else if (failedList[i] === 'digits') {return res.json({ error: "Password must have at least 2 digits" });}
+        }
       }
     }
   }
