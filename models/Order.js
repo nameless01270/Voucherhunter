@@ -19,6 +19,10 @@ const OrderSchema = new Schema(
             type: Number,
             required: true,
         },
+        transactionId: {
+            type: String,
+            required: true,
+        },
         status: {
             type: String,
             default: "unpaid",
