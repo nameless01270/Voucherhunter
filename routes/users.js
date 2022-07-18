@@ -26,21 +26,21 @@ const upload = multer({ storage: storage });
 const router = express.Router();
 
 //UPDATE
-router.put("/edit-user", verifyUser, updateUser);
+router.put("/edit-user", verifyToken, verifyUser, updateUser);
 
 //DELETE
-router.delete("/delete-user", verifyUser, deleteUser);
+router.delete("/delete-user", verifyToken, verifyUser, deleteUser);
 
 //GET
-router.get("/get-user", verifyUser, getUser);
+router.get("/get-user", verifyToken, verifyUser, getUser);
 
 //GET ALL
-router.get("/get-all-user", verifyAdmin, getUsers);
+router.get("/get-all-user", verifyToken, verifyAdmin, getUsers);
 
 //POST
-router.post("/change-password", verifyUser, changePassword);
+router.post("/change-password", verifyToken, verifyUser, changePassword);
 
 //POST
-router.post("/change-user-avatar", verifyUser, upload.single("editUserImage"), changeUserAvatar);
+router.post("/change-user-avatar", verifyToken, verifyUser, upload.single("editUserImage"), changeUserAvatar);
 
 export default router;

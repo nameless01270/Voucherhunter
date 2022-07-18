@@ -227,4 +227,21 @@ export const getCartVoucher = async (req, res, next) => {
         next(err);
       }
     }
+};
+export const getWishVoucher = async (req, res, next) => {
+  let { voucherArray } = req.body;
+  if (!voucherArray) {
+    return res.json({ error: "All filled must be required" });
+  } else {
+    try {
+      let wishVouchers = await Voucher.find({
+        _id: { $in: voucherArray },
+      });
+      if (wishVouchers) {
+        return res.json({ error: "Filter voucher wrong"})
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
 }

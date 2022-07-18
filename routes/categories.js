@@ -5,6 +5,7 @@ import {
     getAllCategory, 
     updateCategory, 
 } from "../controllers/category.js";
+import { verifyToken, verifyUser, verifyAdmin } from "../utils/verifyToken.js";
 import { upload } from "../utils/fileUpload.js";
 
 const router = express.Router();

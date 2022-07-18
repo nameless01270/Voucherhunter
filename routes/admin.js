@@ -22,15 +22,15 @@ const upload = multer({ storage: storage });
 const router = express.Router();
 
 //GET
-router.get("/get-images", verifyAdmin, getImages);
+router.get("/get-images", verifyToken, verifyAdmin, getImages);
 
 //UPDATE
-router.post("/upload-slide-image", verifyAdmin, upload.single("image"), uploadSlideImage);
+router.post("/upload-slide-image", verifyToken, verifyAdmin, upload.single("image"), uploadSlideImage);
 
 //DELETE
-router.post("/delete-slide-image", verifyAdmin, deleteSlideImage);
+router.post("/delete-slide-image", verifyToken, verifyAdmin, deleteSlideImage);
 
 //GET ALL DATA
-router.get("/dashboard-data", verifyAdmin, getAllData);
+router.get("/dashboard-data",verifyToken, verifyAdmin, getAllData);
 
 export default router;

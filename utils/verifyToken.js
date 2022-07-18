@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import { createError } from "../utils/error.js";
+import User from "../models/User.js";
 
 export const verifyToken = (req, res, next) => {
   const token = req.cookies.access_token;
@@ -15,21 +16,22 @@ export const verifyToken = (req, res, next) => {
 };
 
 export const verifyUser = (req, res, next) => {
-  verifyToken(req, res, next, () => {
-    if (req.user.id === req.params.id || req.user.isAdmin) {
+    let { loggedInUserId } = req.body;
+    if (req.user.id === loggedInUserId) {
       next();
     } else {
       return next(createError(403, "You are not authorized!"));
     }
-  });
 };
 
-export const verifyAdmin = (req, res, next) => {
-  verifyToken(req, res, next, () => {
-    if (req.user.isAdmin) {
-      next();
-    } else {
-      return next(createError(403, "You are not admin!"));
+export const verifyAdmin = async (req, res, next) => {
+  try {
+    let reqUser = await User.findById(req.body.loggedInUserId);
+    if (reqUser.isAdmin === false) {
+      res.status(403).json({ error: "Access denied" });
     }
-  });
+    next();
+  } catch {
+    res.status(404);
+  }
 };
